@@ -19,6 +19,7 @@ import 'change_now/change_now_exchange.dart';
 import 'exchange_response.dart';
 import 'majestic_bank/majestic_bank_exchange.dart';
 import 'nanswap/nanswap_exchange.dart';
+import 'chainflip/chainflip_exchange.dart';
 import 'simpleswap/simpleswap_exchange.dart';
 import 'trocador/trocador_exchange.dart';
 
@@ -37,6 +38,8 @@ abstract class Exchange {
         return TrocadorExchange.instance;
       case NanswapExchange.exchangeName:
         return NanswapExchange.instance;
+      case ChainflipExchange.exchangeName:
+        return ChainflipExchange.instance;
       default:
         final split = name.split(" ");
         if (split.length >= 2) {

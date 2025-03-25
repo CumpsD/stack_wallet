@@ -15,6 +15,7 @@ import '../services/exchange/majestic_bank/majestic_bank_exchange.dart';
 import '../services/exchange/nanswap/nanswap_exchange.dart';
 import '../services/exchange/simpleswap/simpleswap_exchange.dart';
 import '../services/exchange/trocador/trocador_exchange.dart';
+import '../services/exchange/chainflip/chainflip_exchange.dart';
 
 abstract class Assets {
   static const svg = _SVG();
@@ -48,6 +49,7 @@ class _EXCHANGE {
   String get majesticBankGreen => "${_path}mb_green.svg";
   String get trocador => "${_path}trocador.svg";
   String get nanswap => "${_path}nanswap.svg";
+  String get chainflip => "${_path}chainflip.svg";
 
   String getIconFor({required String exchangeName}) {
     switch (exchangeName) {
@@ -61,6 +63,8 @@ class _EXCHANGE {
         return trocador;
       case NanswapExchange.exchangeName:
         return nanswap;
+      case ChainflipExchange.exchangeName:
+        return chainflip;
       default:
         throw ArgumentError("Invalid exchange name passed to "
             "Assets.exchange.getIconFor()");

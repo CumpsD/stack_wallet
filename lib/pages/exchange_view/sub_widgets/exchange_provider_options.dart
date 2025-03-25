@@ -18,6 +18,7 @@ import '../../../services/exchange/exchange.dart';
 import '../../../services/exchange/majestic_bank/majestic_bank_exchange.dart';
 import '../../../services/exchange/nanswap/nanswap_exchange.dart';
 import '../../../services/exchange/trocador/trocador_exchange.dart';
+import '../../../services/exchange/chainflip/chainflip_exchange.dart';
 import '../../../themes/stack_colors.dart';
 import '../../../utilities/prefs.dart';
 import '../../../utilities/util.dart';
@@ -95,6 +96,11 @@ class _ExchangeProviderOptionsState
       sendCurrency: sendCurrency,
       receiveCurrency: receivingCurrency,
     );
+    final showChainflip = exchangeSupported(
+      exchangeName: ChainflipExchange.exchangeName,
+      sendCurrency: sendCurrency,
+      receiveCurrency: receivingCurrency,
+    );
 
     return RoundedWhiteContainer(
       padding: isDesktop ? const EdgeInsets.all(0) : const EdgeInsets.all(12),
@@ -141,8 +147,7 @@ class _ExchangeProviderOptionsState
               reversed: widget.reversed,
               exchange: TrocadorExchange.instance,
             ),
-          if ((showChangeNow || showMajesticBank || showTrocador) &&
-              showNanswap)
+          if ((showChangeNow || showMajesticBank || showTrocador) && showNanswap)
             isDesktop
                 ? Container(
                     height: 1,
@@ -157,6 +162,22 @@ class _ExchangeProviderOptionsState
               fixedRate: widget.fixedRate,
               reversed: widget.reversed,
               exchange: NanswapExchange.instance,
+            ),
+          if ((showChangeNow || showMajesticBank || showTrocador || showNanswap) && showChainflip)
+            isDesktop
+                ? Container(
+                    height: 1,
+                    color:
+                        Theme.of(context).extension<StackColors>()!.background,
+                  )
+                : const SizedBox(
+                    height: 16,
+                  ),
+          if (showChainflip)
+            ExchangeOption(
+              fixedRate: widget.fixedRate,
+              reversed: widget.reversed,
+              exchange: ChainflipExchange.instance,
             ),
         ],
       ),

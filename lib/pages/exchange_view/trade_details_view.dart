@@ -33,6 +33,7 @@ import '../../services/exchange/majestic_bank/majestic_bank_exchange.dart';
 import '../../services/exchange/nanswap/nanswap_exchange.dart';
 import '../../services/exchange/simpleswap/simpleswap_exchange.dart';
 import '../../services/exchange/trocador/trocador_exchange.dart';
+import '../../services/exchange/chainflip/chainflip_exchange.dart';
 import '../../themes/stack_colors.dart';
 import '../../themes/theme_providers.dart';
 import '../../utilities/amount/amount.dart';
@@ -1333,6 +1334,10 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                         case NanswapExchange.exchangeName:
                           url =
                               "https://nanswap.com/transaction/${trade.tradeId}";
+                          break;
+                        case ChainflipExchange.exchangeName:
+                          url =
+                              "https://scan.chainflip.io/swaps/${trade.tradeId}";
                           break;
 
                         default:

@@ -35,6 +35,7 @@ import '../../services/exchange/exchange_response.dart';
 import '../../services/exchange/majestic_bank/majestic_bank_exchange.dart';
 import '../../services/exchange/nanswap/nanswap_exchange.dart';
 import '../../services/exchange/trocador/trocador_exchange.dart';
+import '../../services/exchange/chainflip/chainflip_exchange.dart';
 import '../../themes/stack_colors.dart';
 import '../../utilities/amount/amount_unit.dart';
 import '../../utilities/assets.dart';
@@ -89,6 +90,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
         ChangeNowExchange.instance,
         TrocadorExchange.instance,
         NanswapExchange.instance,
+        ChainflipExchange.instance,
       ];
     }
   }
