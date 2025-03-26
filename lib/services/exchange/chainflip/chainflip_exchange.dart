@@ -22,6 +22,7 @@ import '../../../models/isar/exchange_cache/currency.dart';
 import '../../../models/isar/exchange_cache/pair.dart';
 import '../exchange.dart';
 import '../exchange_response.dart';
+import 'api_response_models/cf_currency.dart';
 import 'api_response_models/cf_estimate.dart';
 import 'chainflip_api.dart';
 
@@ -51,65 +52,33 @@ class ChainflipExchange extends Exchange {
         );
       }
 
-      final List<Currency> currencies = [];
+      final response = await ChainflipAPI.instance.getSupportedCurrencies();
 
-      final currency1 = Currency(
-        exchangeName: exchangeName,
-        ticker: "BTC",
-        name: "Bitcoin",
-        network: "Bitcoin",
-        image: "",
-        isFiat: false,
-        rateType: SupportedRateType.estimated,
-        isAvailable: true,
-        isStackCoin: AppConfig.isStackCoin("BTC"),
-        tokenContract: null,
+      if (response.exception != null) {
+        return ExchangeResponse(
+          exception: response.exception,
+        );
+      }
+
+      return ExchangeResponse(
+        value: response.value!
+            .map(
+              (e) => Currency(
+                exchangeName: exchangeName,
+                externalId: e.id,
+                ticker: e.ticker,
+                name: e.name,
+                network: e.network,
+                image: e.image,
+                isFiat: false,
+                rateType: SupportedRateType.estimated,
+                isStackCoin: AppConfig.isStackCoin(e.ticker),
+                tokenContract: null,
+                isAvailable: true,
+              ),
+            )
+            .toList(),
       );
-      currencies.add(currency1);
-
-      final currency2 = Currency(
-        exchangeName: exchangeName,
-        ticker: "ETH",
-        name: "Ethereum",
-        network: "Ethereum",
-        image: "",
-        isFiat: false,
-        rateType: SupportedRateType.estimated,
-        isAvailable: true,
-        isStackCoin: AppConfig.isStackCoin("ETH"),
-        tokenContract: null,
-      );
-      currencies.add(currency2);
-
-      return ExchangeResponse(value: currencies);
-
-      // final response = await ChainflipAPI.instance.getSupportedCurrencies();
-
-      // if (response.exception != null) {
-      //   return ExchangeResponse(
-      //     exception: response.exception,
-      //   );
-      // }
-
-      // return ExchangeResponse(
-      //   value: response.value!
-      //       .where((e) => filter.contains(e.id))
-      //       .map(
-      //         (e) => Currency(
-      //           exchangeName: exchangeName,
-      //           ticker: e.id,
-      //           name: e.name,
-      //           network: e.network,
-      //           image: e.image,
-      //           isFiat: false,
-      //           rateType: SupportedRateType.estimated,
-      //           isStackCoin: AppConfig.isStackCoin(e.id),
-      //           tokenContract: null,
-      //           isAvailable: true,
-      //         ),
-      //       )
-      //       .toList(),
-      // );
     } on ExchangeException catch (e) {
       return ExchangeResponse(
         exception: e,
@@ -174,13 +143,36 @@ class ChainflipExchange extends Exchange {
         );
       }
 
-      // Chainflip has no concept of ranges
-      return ExchangeResponse(
-        value: Range(
-          min: null,
-          max: null,
-        ),
-      );
+      // TODO: Cache currencies
+      final response = await ChainflipAPI.instance.getSupportedCurrencies();
+
+      if (response.exception != null) {
+        return ExchangeResponse(
+          exception: response.exception,
+        );
+      }
+
+      CFCurrency? currency = response.value!.cast<CFCurrency?>().firstWhere(
+          (c) => c?.ticker == from,
+          orElse: () => null,
+        );
+
+      if (currency == null)
+      {
+        return ExchangeResponse(
+          value: Range(
+            min: null,
+            max: null,
+          ),
+        );
+      } else {
+        return ExchangeResponse(
+          value: Range(
+            min: Decimal.parse(currency.minAmount.toString()),
+            max: null,
+          ),
+        );
+      }
     } on ExchangeException catch (e) {
       return ExchangeResponse(
         exception: e,

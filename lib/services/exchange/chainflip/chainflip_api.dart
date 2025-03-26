@@ -8,6 +8,7 @@ import '../../../networking/http.dart';
 import '../../../utilities/logger.dart';
 import '../../../utilities/prefs.dart';
 import '../exchange_response.dart';
+import 'api_response_models/cf_currency.dart';
 import 'api_response_models/cf_estimate.dart';
 
 class ChainflipAPI {
@@ -17,6 +18,32 @@ class ChainflipAPI {
   static const authority = "chainflip-broker.io";
   static const apiKey = "6ba154d4-e219-472a-9674-5fa5b1300ccf";
   static const commissionBps = "20";
+
+  static const Map<String, String> cfToSwCurrencyMap = {
+    'btc.btc': 'BTC',
+    'dot.dot': 'DOT',
+    'eth.arb': 'ETHARB',
+    'eth.eth': 'ETH',
+    'flip.eth': 'FLIP',
+    'sol.sol': 'SOL',
+    'usdc.arb': 'USDCARB',
+    'usdc.eth': 'USDC',
+    'usdc.sol': 'USDCSOL',
+    'usdt.eth': 'USDTERC20',
+  };
+
+  static const Map<String, String> swToCfCurrencyMap = {
+    'BTC': 'btc.btc',
+    'DOT': 'dot.dot',
+    'ETHARB': 'eth.arb',
+    'ETH': 'eth.eth',
+    'FLIP': 'flip.eth',
+    'SOL': 'sol.sol',
+    'USDCARB':  'usdc.arb',
+    'USDC': 'usdc.eth',
+    'USDCSOL': 'usdc.sol',
+    'USDTERC20': 'usdt.eth',
+  };
 
   static ChainflipAPI? _instance;
   static ChainflipAPI get instance => _instance ??= ChainflipAPI._();
@@ -28,6 +55,11 @@ class ChainflipAPI {
   }
 
   Future<dynamic> _makeGetRequest(Uri uri) async {
+    Logging.instance.log(
+      "Chainflip._makeGetRequest(): $uri",
+      level: LogLevel.Info,
+    );
+
     int code = -1;
     try {
       final response = await _client.get(
@@ -54,20 +86,56 @@ class ChainflipAPI {
 
   // ============= API ===================================================
 
+  // GET List of supported currencies
+  // https://chainflip-broker.io/assets
+  Future<ExchangeResponse<List<CFCurrency>>> getSupportedCurrencies() async {
+    final uri = _buildUri(
+      endpoint: "assets",
+    );
+
+    try {
+      final json = await _makeGetRequest(uri);
+
+      final jsonCurrencies = Map<String, dynamic>.from(json as Map)["assets"] as List<dynamic>;
+
+      final List<CFCurrency> currencies = jsonCurrencies
+          .map((item) => CFCurrency.fromJson(Map<String, dynamic>.from(item as Map), cfToSwCurrencyMap))
+          .toList();
+
+      return ExchangeResponse(value: currencies);
+    } catch (e, s) {
+      Logging.instance.log(
+        "Chainflip.getSupportedCurrencies(): $e\n$s",
+        level: LogLevel.Error,
+      );
+      return ExchangeResponse(
+        exception: ExchangeException(
+          e.toString(),
+          ExchangeExceptionType.generic,
+        ),
+      );
+    }
+  }
+
   // GET Get estimate
-  // https://chainflip-broker.io/quotes?apikey=XXX&sourceAsset=btc.btc&destinationAsset=usdt.eth&amount=1'
+  // https://chainflip-broker.io/quotes?apikey=XXX&sourceAsset=btc.btc&destinationAsset=usdt.eth&amount=1
   Future<ExchangeResponse<CFEstimate>> getEstimate({
     required String amountFrom,
     required String from,
     required String to,
   }) async {
+    Logging.instance.log(
+      "Chainflip.getEstimate(): $from -> $to",
+      level: LogLevel.Info,
+    );
+
     final uri = _buildUri(
       endpoint: "quotes",
       params: {
         "apikey": apiKey,
         "commissionBps": commissionBps,
-        "sourceAsset": "btc.btc",
-        "destinationAsset": "eth.eth",
+        "sourceAsset": swToCfCurrencyMap[from]!,
+        "destinationAsset": swToCfCurrencyMap[to]!,
         "amount": amountFrom,
       },
     );
@@ -76,6 +144,22 @@ class ChainflipAPI {
       final json = await _makeGetRequest(uri);
 
       try {
+        if (json is Map<String, dynamic>) {
+          final potentialError = Map<String, dynamic>.from(json as Map);
+          if (potentialError != null) {
+            final errorMessage = potentialError["detail"] as String?;
+
+            if (errorMessage != null) {
+              return ExchangeResponse(
+                exception: ExchangeException(
+                  errorMessage,
+                  ExchangeExceptionType.generic,
+                ),
+              );
+            }
+          }
+        }
+
         final List<dynamic> jsonEstimates = json as List<dynamic>;
 
         final List<CFEstimate> estimates = jsonEstimates
