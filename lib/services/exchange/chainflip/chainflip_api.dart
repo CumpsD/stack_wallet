@@ -99,7 +99,7 @@ class ChainflipAPI {
       final jsonCurrencies = Map<String, dynamic>.from(json as Map)["assets"] as List<dynamic>;
 
       final List<CFCurrency> currencies = jsonCurrencies
-          .map((item) => CFCurrency.fromJson(Map<String, dynamic>.from(item as Map), cfToSwCurrencyMap))
+          .map((item) => CFCurrency.fromJson(Map<String, dynamic>.from(item as Map), cfToSwCurrencyMap, authority))
           .toList();
 
       return ExchangeResponse(value: currencies);
@@ -172,6 +172,7 @@ class ChainflipAPI {
         );
 
         if (dcaEstimate != null) {
+          // TODO: Check boost quote
           return ExchangeResponse(
             value: dcaEstimate
           );
@@ -183,6 +184,7 @@ class ChainflipAPI {
         );
 
         if (regularEstimate != null) {
+          // TODO: Check boost quote
           return ExchangeResponse(
             value: regularEstimate
           );

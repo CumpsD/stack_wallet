@@ -15,12 +15,12 @@ class CFCurrency {
     required this.minAmount,
   });
 
-  factory CFCurrency.fromJson(Map<String, dynamic> json, Map<String, String> currencyMap) {
+  factory CFCurrency.fromJson(Map<String, dynamic> json, Map<String, String> currencyMap, String authority) {
     return CFCurrency(
       id: json["id"] as String,
       ticker: currencyMap[json['id'] as String] ?? "",
       name: json['name'] as String,
-      image: json['assetLogo'] as String,
+      image: "https://" + authority + json['assetLogo'] as String,
       network: json['network'] as String,
       minAmount: json['minimalAmount'] as num,
     );
