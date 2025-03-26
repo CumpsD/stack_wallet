@@ -34,6 +34,8 @@ class ChainflipExchange extends Exchange {
 
   static const exchangeName = "Chainflip";
 
+  List<CFCurrency>? supportedCurrencies;
+
   @override
   String get name => exchangeName;
 
@@ -52,16 +54,20 @@ class ChainflipExchange extends Exchange {
         );
       }
 
-      final response = await ChainflipAPI.instance.getSupportedCurrencies();
+      if (supportedCurrencies == null) {
+        final response = await ChainflipAPI.instance.getSupportedCurrencies();
 
-      if (response.exception != null) {
-        return ExchangeResponse(
-          exception: response.exception,
-        );
+        if (response.exception != null) {
+          return ExchangeResponse(
+            exception: response.exception,
+          );
+        }
+
+        supportedCurrencies = response.value!;
       }
 
       return ExchangeResponse(
-        value: response.value!
+        value: supportedCurrencies!
             .map(
               (e) => Currency(
                 exchangeName: exchangeName,
@@ -143,16 +149,19 @@ class ChainflipExchange extends Exchange {
         );
       }
 
-      // TODO: Cache currencies
-      final response = await ChainflipAPI.instance.getSupportedCurrencies();
+      if (supportedCurrencies == null) {
+        final response = await ChainflipAPI.instance.getSupportedCurrencies();
 
-      if (response.exception != null) {
-        return ExchangeResponse(
-          exception: response.exception,
-        );
+        if (response.exception != null) {
+          return ExchangeResponse(
+            exception: response.exception,
+          );
+        }
+
+        supportedCurrencies = response.value!;
       }
 
-      CFCurrency? currency = response.value!.cast<CFCurrency?>().firstWhere(
+      CFCurrency? currency = supportedCurrencies!.cast<CFCurrency?>().firstWhere(
           (c) => c?.ticker == from,
           orElse: () => null,
         );
