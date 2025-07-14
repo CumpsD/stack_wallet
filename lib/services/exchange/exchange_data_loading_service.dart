@@ -425,9 +425,8 @@ class ExchangeDataLoadingService {
         await isar.currencies.putAll(responseCurrencies.value!);
       });
     } else {
-      Logging.instance.log(
+      Logging.instance.w(
         "loadChainflipCurrencies: $responseCurrencies",
-        level: LogLevel.Warning,
       );
     }
   }

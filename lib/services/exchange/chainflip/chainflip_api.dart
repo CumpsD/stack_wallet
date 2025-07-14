@@ -55,9 +55,8 @@ class ChainflipAPI {
   }
 
   Future<dynamic> _makeGetRequest(Uri uri) async {
-    Logging.instance.log(
+    Logging.instance.i(
       "Chainflip._makeGetRequest(): $uri",
-      level: LogLevel.Info,
     );
 
     int code = -1;
@@ -76,9 +75,8 @@ class ChainflipAPI {
 
       return parsed;
     } catch (e, s) {
-      Logging.instance.log(
+      Logging.instance.e(
         "ChainflipAPI._makeRequest($uri) HTTP:$code threw: $e\n$s",
-        level: LogLevel.Error,
       );
       rethrow;
     }
@@ -104,9 +102,8 @@ class ChainflipAPI {
 
       return ExchangeResponse(value: currencies);
     } catch (e, s) {
-      Logging.instance.log(
+      Logging.instance.e(
         "Chainflip.getSupportedCurrencies(): $e\n$s",
-        level: LogLevel.Error,
       );
       return ExchangeResponse(
         exception: ExchangeException(
@@ -124,9 +121,8 @@ class ChainflipAPI {
     required String from,
     required String to,
   }) async {
-    Logging.instance.log(
+    Logging.instance.i(
       "Chainflip.getEstimate(): $from -> $to",
-      level: LogLevel.Info,
     );
 
     final uri = _buildUri(
@@ -197,16 +193,14 @@ class ChainflipAPI {
           ),
         );
       } catch (_) {
-        Logging.instance.log(
+        Logging.instance.e(
           "Chainflip.getEstimate() response was: $json",
-          level: LogLevel.Error,
         );
         rethrow;
       }
     } catch (e, s) {
-      Logging.instance.log(
+      Logging.instance.e(
         "Chainflip.getEstimate() exception: $e\n$s",
-        level: LogLevel.Error,
       );
       return ExchangeResponse(
         exception: ExchangeException(
